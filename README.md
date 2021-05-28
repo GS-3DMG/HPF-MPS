@@ -7,12 +7,38 @@ In this work, a new hybrid parallel framework is proposed for the case of MPS si
 
 ## Compiler Environment
 This code has been tested in the Unix system:
+
 * MPICC/3.2.1
 * GCC/7.2.0
 
 ## Examples
-Training image: Strbelle_250x250.sgems
-Conditioning data: Con_100.sgems
+A small-scale test data is provided
+
+* Training image: Strbelle_250x250.sgems
+* Conditioning data: Con_100.sgems
+
+## Usage
+* Complie
+
+mpic++ -o test DS_Simultion.cpp Simulation.h Simulation.cpp -fopenmp
+
+* Execute
+
+mpirun -n -p training ./test
+
+## Contributors
+
+Please report the bugs and error to us. 
+
+We will be happy to remove and enhance the codes.
+
+Thanks,
+
+Email: czs@cug.edu.cn & qiyu.chen@cug.edu.cn
+
+## Maintainer
+
+czs@cug.edu.cn
 
 ## License
 MIT
