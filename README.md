@@ -8,11 +8,11 @@ In this work, a new hybrid parallel framework is proposed for the case of MPS si
 ## Hardware required
 This work has been tested in the following two hardware environments：
 
-Hardware 1:
+Hardware environment 1:
 * CPU: Intel i7-8700
 * RAM: 16GB
 
-Hardware 2:
+Hardware environment 2:
 * CPU: Intel Xeon E5-2692
 * RAM: 64GB
 
