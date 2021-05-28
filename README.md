@@ -5,9 +5,14 @@ Multiple-point geostatistical (MPS) simulation methods have attracted an enormou
 
 In this work, a new hybrid parallel framework is proposed for the case of MPS simulation on large areas with enormous amount of grid cells. Both inter-node-level and intra-node-level parallel strategies are combined in this framework. To maintain the quality of the realizations, we implement a conflict control method adapting to the Monte-Carlo process. Also, an optimization method for the simulation information is embedded to reduce the inter-node communication overhead. 
 
-## Compiler Environment
-This code has been tested in the Unix system:
+## Hardware required
+This work has been tested in the following two hardware environments：
 
+Hardware 1:
+* Intel i7-8700 
+
+## Software required
+* Unix OS
 * MPICC/3.2.1
 * GCC/7.2.0
 
