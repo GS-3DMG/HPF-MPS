@@ -41,4 +41,4 @@ Email: czs@cug.edu.cn & qiyu.chen@cug.edu.cn
 czs@cug.edu.cn
 
 ## License
-MIT
+[MIT]https://github.com/GS-3DMG/HPF-MPS/blob/main/LICENSE
