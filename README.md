@@ -40,5 +40,9 @@ Email: czs@cug.edu.cn & qiyu.chen@cug.edu.cn
 
 czs@cug.edu.cn
 
+## Acknowledgement
+
+This work was supported by the National Natural Science Foundation of China (41902304, 41942039, U1711267) and the Open Research Project of the Hubei Key Laboratory of Intelligent Geo-Information Processing (KLIGIP-2018B05).
+
 ## License
 [MIT]https://github.com/GS-3DMG/HPF-MPS/blob/main/LICENSE
