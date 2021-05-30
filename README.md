@@ -29,12 +29,13 @@ A small-scale test data is provided:
 
 ## Usage
 * Complie
-
+```
 mpic++ -o test DS_Simultion.cpp Simulation.h Simulation.cpp -fopenmp
-
+```
 * Execute
-
+```
 mpirun -n -p training ./test
+```
 
 ## Contributors
 
