@@ -15,10 +15,6 @@ CSimulation::CSimulation(int simx, int simy, int simz, double f, double thr, Dis
 	m_DistanceType = distanceType;
 	m_Simul_Path_Type = simulPathType;
 	IsHaveSamples = isHaveSamples;
-	if(m_SearchArea.MySearchAreaData.Sphere.IsUseSamePathSize == false){
-		std::cout << m_SearchArea.MySearchAreaData.Sphere.SearchRadius << std::endl;
-		std::cout << m_SearchArea.MySearchAreaData.Sphere.MaxPoints << std::endl;
-	}
 	IsSimulation = false;
 	m_TiX = m_TiY = m_TiZ = 0;
 	IsHaveTi = false;
@@ -275,11 +271,13 @@ bool CSimulation::SaveSimulation(string FilePath, PropertyFileType ext)
 	return true;
 	
 }
+//TODO this function should be changed to MPI function
 std::string CSimulation::StartSimulation()
 {
+	//TODO if effectivePoint.size != 0, there may exist conflits
 	//compare with Usim(simulating node in slave processes)
-	int current_pid, comm_size, nameLen;
-	char processorName[MPI_MAX_PROCESSOR_NAME];
+    int current_pid, comm_size, nameLen;
+    char processorName[MPI_MAX_PROCESSOR_NAME];
 	MPI_Comm_rank(MPI_COMM_WORLD, &current_pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 	MPI_Get_processor_name(processorName, &nameLen);
@@ -294,31 +292,31 @@ std::string CSimulation::StartSimulation()
 	//commit C3DPoint Type
 	C3DPoint point;
 	int blocklens_array[5];
-	MPI_Datatype old_type[5];
-	MPI_Aint dlp_array[5];
-	blocklens_array[0] = 1;
-	blocklens_array[1] = 1;
-	blocklens_array[2] = 1;
-	blocklens_array[3] = 1;
-	blocklens_array[4] = 1;
-	old_type[0] = MPI_INT;
-	old_type[1] = MPI_INT;
-	old_type[2] = MPI_INT;
-	old_type[3] = MPI_DOUBLE;
-	old_type[4] = MPI_DOUBLE;
-	MPI_Address(&point.x,&dlp_array[0]);
-	MPI_Address(&point.y,&dlp_array[1]);
-	MPI_Address(&point.z,&dlp_array[2]);
-	MPI_Address(&point.values, &dlp_array[3]);
-	MPI_Address(&point.distances, &dlp_array[4]);
-	dlp_array[4]=dlp_array[4]-dlp_array[0];
-	dlp_array[3]=dlp_array[3]-dlp_array[0];
-	dlp_array[2]=dlp_array[2]-dlp_array[0];
-	dlp_array[1]=dlp_array[1]-dlp_array[0];
-	dlp_array[0]=0;
-	MPI_Datatype C3DPointType;
-	MPI_Type_struct(5, blocklens_array, dlp_array, old_type, &C3DPointType);                                                 
-	MPI_Type_commit(&C3DPointType);
+    MPI_Datatype old_type[5];
+    MPI_Aint dlp_array[5];
+    blocklens_array[0] = 1;
+    blocklens_array[1] = 1;
+    blocklens_array[2] = 1;
+    blocklens_array[3] = 1;
+    blocklens_array[4] = 1;
+    old_type[0] = MPI_INT;
+    old_type[1] = MPI_INT;
+    old_type[2] = MPI_INT;
+    old_type[3] = MPI_DOUBLE;
+    old_type[4] = MPI_DOUBLE;
+    MPI_Address(&point.x,&dlp_array[0]);
+    MPI_Address(&point.y,&dlp_array[1]);
+    MPI_Address(&point.z,&dlp_array[2]);
+    MPI_Address(&point.values, &dlp_array[3]);
+    MPI_Address(&point.distances, &dlp_array[4]);
+    dlp_array[4]=dlp_array[4]-dlp_array[0];
+    dlp_array[3]=dlp_array[3]-dlp_array[0];
+    dlp_array[2]=dlp_array[2]-dlp_array[0];
+    dlp_array[1]=dlp_array[1]-dlp_array[0];
+    dlp_array[0]=0;
+    MPI_Datatype C3DPointType;
+    MPI_Type_struct(5, blocklens_array, dlp_array, old_type, &C3DPointType);                                                 
+    MPI_Type_commit(&C3DPointType);
 	//declaration of effective point
 	vector<C3DPoint> EffectivePoint;
 	
@@ -330,29 +328,15 @@ std::string CSimulation::StartSimulation()
 	double *buffer_for_packed = NULL;
 
 	vector<int> EffectivePointParams;
-	/*if (IsHaveSamples){
-				string results = InsertSamples();
-				if (results != "Successfully loaded sample data!")
-				{
-					return "Error in loading sample: " + results;
-				}
-	}*/
-	//task of main process: get effective points, deal with the conflicts, and send N(x), x, f(x) to slaves.
+	
 	if(current_pid == 0){
-		/*if (IsHaveSamples){
-			string results = InsertSamples();
-			if (results != "Successfully loaded sample data!")
-			{
-				return "Error in loading sample: " + results;
-			}
-		}*/
-		std::cout << _x0 << " " << _x1 << " " << _y0 << " " << _y1 << " " << _z0 << " " << _z1 << std::endl;
+		//std::cout << _x0 << " " << _x1 << " " << _y0 << " " << _y1 << " " << _z0 << " " << _z1 << std::endl;
 		_x0 = 0;
 		_x1 = 0;
  		_y0 = 0;
-		_y1 = 0;
+    _y1 = 0;
  		_z0 = 0;
-		_z1 = 0;
+    _z1 = 0;
 		int xRadius = 0;
 		int yRadius = 0;
 		int zRadius = 0;
@@ -375,14 +359,13 @@ std::string CSimulation::StartSimulation()
 				xRadius = temp < (m_TiX - 1) / 2 ? temp : (m_TiX - 1) / 2;
 				yRadius = temp < (m_TiY - 1) / 2 ? temp : (m_TiY - 1) / 2;
 				zRadius = temp < (m_TiZ - 1) / 2 ? temp : (m_TiZ - 1) / 2;
-				//std::cout << "search radius is " << temp << endl;
-				//system("pause");
 				break;
 			}
 			default:
 				break;
 		}
 		SetPath_Simul(xRadius,yRadius,zRadius);
+		std::cout << "sim path create finish" << std::endl;
 		int all_sim_node_num = sim_path.size();
 		
 		//send Ti
@@ -408,7 +391,6 @@ std::string CSimulation::StartSimulation()
 			MPI_Send(buffer_for_packed, buffer_size, MPI_PACKED, i, 56, MPI_COMM_WORLD);
 		}
 		std::cout << "send TI finish" << std::endl;*/	
-		
 		//init slave data
 		for (int i = 1; i < comm_size; i++) {
 			int x = -1;
@@ -417,25 +399,23 @@ std::string CSimulation::StartSimulation()
 			while(sim_path.size() != 0) {
 				x = sim_path.front();//get a node from sim_path
 				vector<int>::iterator k = sim_path.begin();
-				sim_path.erase(k); //remove this node from sim_path
+                		sim_path.erase(k); //remove this node from sim_path
+				
 				PathToXYZ(x, currentX, currentY, currentZ, m_SimX, m_SimY);
 				EffectivePoint.clear();
 				GetEffectivePoint(EffectivePoint, currentX, currentY, currentZ);//Get Effective Points
 				EffectivePointParams.clear();
-				EffectivePointParams.push_back(_x0);
-				EffectivePointParams.push_back(_x1);
-				EffectivePointParams.push_back(_y0);
-				EffectivePointParams.push_back(_y1);
-				EffectivePointParams.push_back(_z0);
-				EffectivePointParams.push_back(_z1);
+                        	EffectivePointParams.push_back(_x0);
+                        	EffectivePointParams.push_back(_x1);
+                        	EffectivePointParams.push_back(_y0);
+                        	EffectivePointParams.push_back(_y1);
+                        	EffectivePointParams.push_back(_z0);
+                        	EffectivePointParams.push_back(_z1);
 				if(EffectivePoint.size() != 0) {
 					break; //the N(x) is effective, then break and send data to slave
 				}
 				else{
 					m_Sim[currentZ][currentX][currentY] = m_Ti[rand() % m_TiZ][rand() % m_TiX][rand() % m_TiY];
-					//std::cout << current_pid << " random value: " << m_Sim[currentZ][currentX][currentY] << std::endl;
-					//cntRandomDebug++;
-					//sim_path.push_back(x);
 				}
 			}
 			//update Usim (use to judge if there is conflict)
@@ -447,7 +427,7 @@ std::string CSimulation::StartSimulation()
 			EffectivePointParams.push_back(x);
 			int e_size = EffectivePoint.size();
 			EffectivePointParams.push_back(e_size);
-			MPI_Send(&EffectivePointParams[0], 9, MPI_INT, i, 1001, MPI_COMM_WORLD);
+      MPI_Send(&EffectivePointParams[0], 9, MPI_INT, i, 1001, MPI_COMM_WORLD);
 			MPI_Send(&EffectivePoint[0], e_size, C3DPointType, i, 999, MPI_COMM_WORLD);
 		}
 		std::cout << "init slaves value finished " << std::endl;
@@ -460,8 +440,6 @@ std::string CSimulation::StartSimulation()
 		int lastProgress = 0;
 		staTime = clock();
 		while (!sim_path.empty()){
-		//for (int iii = 0; iii < 1000; iii++) {
-			//loop all slaves to find the idle node
 			double value = -1;
 			MPI_Request request;
 			MPI_Irecv(&recv_result[0], 2, MPI_DOUBLE, MPI_ANY_SOURCE, 888, MPI_COMM_WORLD, &request);
@@ -469,10 +447,11 @@ std::string CSimulation::StartSimulation()
 			value = recv_result[0];
 			simulated_node_index = (int) recv_result[1];
 			p_iter = status.MPI_SOURCE;
+			//std::cout << "main process recv slave " << p_iter << " value " << value << " of NO." << simulated_node_index << std::endl;
+			//recv VALUE and 3D-INDEX and set them into SG
 			int simulated_x, simulated_y, simulated_z;
 			PathToXYZ(simulated_node_index, simulated_x, simulated_y, simulated_z, m_SimX, m_SimY);
 			m_Sim[simulated_z][simulated_x][simulated_y] = value;
-			//std::cout<< "simulation grid " << simulated_x << " " << simulated_y << " " << simulated_z << " value " << value << std::endl;
 			//update Usim (remove recv node value)
 			std::vector<int>::iterator pos;
 			pos = find(Usim.begin(), Usim.end(), simulated_node_index);
@@ -482,64 +461,55 @@ std::string CSimulation::StartSimulation()
 			//get a new node need to be simulated
 			current_node_index = -1;
 			//vector<C3DPoint> EffectivePoint;
-			while(sim_path.size() != 0) {
+	        	while(sim_path.size() != 0) {
 				int currentX = -1, currentY = -1, currentZ = -1;
 				current_node_index = sim_path.front();//get a node from sim_path
 				vector<int>::iterator k = sim_path.begin();
 				sim_path.erase(k); //remove this node from sim_path
-				//current_node_index = 10000;
 				EffectivePoint.clear();
 				PathToXYZ(current_node_index, currentX, currentY, currentZ, m_SimX, m_SimY);
 				GetEffectivePoint(EffectivePoint, currentX, currentY, currentZ);//Get Effective Points
 				EffectivePointParams.clear();
 				EffectivePointParams.push_back(_x0);
-				EffectivePointParams.push_back(_x1);
-				EffectivePointParams.push_back(_y0);
-				EffectivePointParams.push_back(_y1);
-				EffectivePointParams.push_back(_z0);
-				EffectivePointParams.push_back(_z1);
+                        	EffectivePointParams.push_back(_x1);
+                        	EffectivePointParams.push_back(_y0);
+                        	EffectivePointParams.push_back(_y1);
+                        	EffectivePointParams.push_back(_z0);
+                        	EffectivePointParams.push_back(_z1);
 				//conflict judgement
 				int cntForConflict = 0;
 				bool conflict = isConflictExists(EffectivePoint, Usim, currentX, currentY, currentZ);
-				if(conflict == true){
-					std::cout<<"sb1"<<std::endl;
-				} else {
-					std::cout<<"sb2"<<std::endl;
-				}
-				while(conflict && cntForConflict < 5 && sim_path.size()!=0) {
+				/*while(conflict && cntForConflict < 5 && sim_path.size()!=0) {
 					sim_path.push_back(current_node_index);
 					EffectivePoint.clear();
 					current_node_index = sim_path.front();
 					vector<int>::iterator temp_iter = sim_path.begin();
 					sim_path.erase(temp_iter);
 					PathToXYZ(current_node_index, currentX, currentY, currentZ, m_SimX, m_SimY);
-					GetEffectivePoint(EffectivePoint, currentX, currentY, currentZ);
+                    			GetEffectivePoint(EffectivePoint, currentX, currentY, currentZ);
 					EffectivePointParams.clear();
 					EffectivePointParams.push_back(_x0);
-					EffectivePointParams.push_back(_x1);
-					EffectivePointParams.push_back(_y0);
-					EffectivePointParams.push_back(_y1);
-					EffectivePointParams.push_back(_z0);
-					EffectivePointParams.push_back(_z1);
+                        		EffectivePointParams.push_back(_x1);
+                       			EffectivePointParams.push_back(_y0);
+                       			EffectivePointParams.push_back(_y1);
+                        		EffectivePointParams.push_back(_z0);
+                        		EffectivePointParams.push_back(_z1);
 					conflict = isConflictExists(EffectivePoint, Usim, currentX, currentY, currentZ);
 					cntForConflict++;
 				}
 				if(conflict) {
-					sim_path.push_back(current_node_index);
-				}
+					//std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+					//sim_path.push_back(current_node_index);
+				}*/
 				if(EffectivePoint.size() != 0) {
 					break; //the N(x) is effective, then break and send data to slave
-				}
+        }
 				else{
 					m_Sim[currentZ][currentX][currentY] = m_Ti[rand() % m_TiZ][rand() % m_TiX][rand() % m_TiY];
-					sim_path.push_back(current_node_index);
-					//std::cout << current_pid << " random value: " << m_Sim[currentZ][currentX][currentY] << std::endl;
-					//cntRandomDebug++;
 				}
 			}
 			//update Usim
 			Usim.push_back(current_node_index);
-			//std::cout << "sb Effective Point size: " << EffectivePoint.size() << std::endl;
 			term_signal = 0;
 			MPI_Send(&term_signal, 1, MPI_INT, p_iter, 66, MPI_COMM_WORLD); 
 			int thr_index = all_sim_node_num - sim_path.size();
@@ -548,7 +518,7 @@ std::string CSimulation::StartSimulation()
 			int e_size = EffectivePoint.size();
 			EffectivePointParams.push_back(e_size);
 			MPI_Send(&EffectivePointParams[0], 9, MPI_INT, p_iter, 1001, MPI_COMM_WORLD);
-			
+			//std::cout << "main process send NO." << current_node_index << " to slave " << p_iter << std::endl;
 			MPI_Send(&EffectivePoint[0], e_size, C3DPointType, p_iter, 999, MPI_COMM_WORLD);
 			int allNum = m_SimX * m_SimY * m_SimZ;
 			int nodeSim = allNum - sim_path.size();
@@ -568,7 +538,6 @@ std::string CSimulation::StartSimulation()
 			vector<double> result;
 			result.resize(2); 
 			MPI_Irecv(&result[0], 2, MPI_DOUBLE, i, 888, MPI_COMM_WORLD, &request);
-			//MPI_Irecv(&r_index, 1, MPI_INT, i, 777, MPI_COMM_WORLD, &request);
 			MPI_Wait(&request, &status);
 			r_value = result[0];
 			r_index = (int) result[1];
@@ -576,7 +545,8 @@ std::string CSimulation::StartSimulation()
 			PathToXYZ(r_index, xx, yy, zz, m_SimX, m_SimY);
 			m_Sim[zz][xx][yy] = r_value;
 			term_signal = 1;
-			MPI_Send(&term_signal, 1, MPI_INT, i, 66, MPI_COMM_WORLD);  
+			MPI_Send(&term_signal, 1, MPI_INT, i, 66, MPI_COMM_WORLD);
+			result.clear();
 		}
 		//endTime = clock();
 		//std::cout << "The runtime: " << (double) (endTime - staTime) / CLOCKS_PER_SEC << "s" << std::endl;
@@ -584,7 +554,6 @@ std::string CSimulation::StartSimulation()
 	}
 	//slaves: waiting for the N(x), x, f(x). EffectivePoint, current node, conflict flag.
 	else { // slaves
-
 		//recv packed Ti
 		/*vector<int> tiParas_slave;
 		tiParas_slave.resize(3);
@@ -656,30 +625,29 @@ std::string CSimulation::StartSimulation()
 				scanZ = m_TiZ;
 			}
 		}
+		/*int scanX = m_TiX;
+		int scanY = m_TiY;
+		int scanZ = m_TiZ;*/
 		
 		//get path of scanning TI
 		pathTi = SetPath_TI(scanX, scanY, scanZ); 
+		//std::cout << "DEBUG: path ti completed" << std::endl; 
 		int j = 0;
 		double Thr = 0;
 		int cnt_for_debug = 0;
 		int thr_index;
 		while(1){
-			//index_for_debug = 2;
 			double sim_value = -1;
 
 			int xTemp, yTemp, zTemp;
 			int nodeX, nodeY, nodeZ;		
-			//std::cout<<"DEBUG: " << m_TiX << " " << m_TiY << " " <<m_TiZ << std::endl;
 			MPI_Recv(&term_signal, 1, MPI_INT, 0, 66, MPI_COMM_WORLD, &status);
 			if(term_signal == 1){
 				break;
 			}
-			//std::cout << "DEBUG: term_signal " << term_signal << std::endl;
 			//recv node information
 			int sim_node_index;
-	
 			int recv_length = 0;
-			
 			EffectivePointParams.resize(9);
 			MPI_Recv(&EffectivePointParams[0], 9, MPI_INT, 0, 1001, MPI_COMM_WORLD, &status);
 			_x0 = EffectivePointParams[0];
@@ -694,7 +662,6 @@ std::string CSimulation::StartSimulation()
 			EffectivePoint.resize(recv_length);
 			PathToXYZ(sim_node_index, nodeX, nodeY, nodeZ, m_SimX, m_SimY);
 			MPI_Recv(&EffectivePoint[0], recv_length, C3DPointType, 0, 999, MPI_COMM_WORLD, &status);
-			
 
 			if (m_SearchArea.MySearchAreaType == SearchArea::SearchAreaType::Sphere)
 			{
@@ -706,28 +673,28 @@ std::string CSimulation::StartSimulation()
 				}
 			}
 			volatile bool finish_flag = false, assign_flag = false;
-			vector<int> bestX, bestY, bestZ;
-			vector<double> mindist;
-			int numThreads = 8;
-			bestX.resize(numThreads);
-			bestY.resize(numThreads);
-			bestZ.resize(numThreads);
+      vector<int> bestX, bestY, bestZ;
+      vector<double> mindist;
+      int numThreads = 3;
+      bestX.resize(numThreads);
+      bestY.resize(numThreads);
+      bestZ.resize(numThreads);
 			mindist.resize(numThreads);
-			for(int i = 0; i < numThreads; i++ ) {
-				bestX[i] = -1;
-				bestY[i] = -1;
-				bestZ[i] = -1;
-				mindist[i] = TMP_MAX;
-			}
+      for(int i = 0; i < numThreads; i++ ) {
+        bestX[i] = -1;
+        bestY[i] = -1;
+        bestZ[i] = -1;
+        mindist[i] = TMP_MAX;
+      }
 			//std::cout << "init multiple thread" << std::endl;
-			#pragma omp parallel default(none) shared(mindist, finish_flag, assign_flag, bestX, bestY, bestZ, scanX, scanY, scanZ, std::cout) firstprivate(EffectivePoint, pathTi, j, _x0, _y0, _z0, _x1, _y1, _z1, m_TiX, m_TiY, m_TiZ, xRadius, yRadius, zRadius, nodeX, nodeY, nodeZ)
+			#pragma omp parallel num_threads(3) default(none) shared(mindist, finish_flag, assign_flag, bestX, bestY, bestZ, scanX, scanY, scanZ, std::cout) firstprivate(EffectivePoint, pathTi, j, _x0, _y0, _z0, _x1, _y1, _z1, m_TiX, m_TiY, m_TiZ, xRadius, yRadius, zRadius, nodeX, nodeY, nodeZ)
 			{
 				int privateBestX = -1, privateBestY = -1, privateBestZ = -1;
 				double privateMinDist = TMP_MAX;
 				double distances = 0;
 				int xxx = scanX*scanY*scanZ*m_F;
 				int xTi = -1, yTi = -1, zTi = -1, tempTi = -1;
-				int athnum = 8;
+				int athnum = 3;
 				int cthid = omp_get_thread_num();
 				int len = xxx / athnum;
 				int start = cthid * len;
@@ -736,6 +703,7 @@ std::string CSimulation::StartSimulation()
 				{
 					end = xxx;
 				}
+				//std::cout<<"before for"<<std::endl;
 				#pragma omp for
 				for (int m = start; m < end; m++)
 				{
@@ -748,23 +716,22 @@ std::string CSimulation::StartSimulation()
 							j = 0;
 						}
 						if (m_SearchArea.MySearchAreaType == SearchArea::SearchAreaType::Sphere && m_SearchArea.MySearchAreaData.Sphere.IsUseSamePathSize == false){
-							xTi = pathTi[j] / (scanY * scanZ);
-							tempTi = pathTi[j] % (scanY * scanZ);
-							yTi = tempTi / scanZ;
-							zTi = tempTi % scanZ;
-							if (xTi < _x0 || xTi >= m_TiX - _x1||yTi < _y0 || yTi >= m_TiY - _y1||zTi < _z0 || zTi >= m_TiZ - _z1)
-							{
-							//	std::cout << "out of edge" << std::endl;
-								continue;
-							}
+              xTi = pathTi[j] / (scanY * scanZ);
+              tempTi = pathTi[j] % (scanY * scanZ);
+              yTi = tempTi / scanZ;
+              zTi = tempTi % scanZ;
+              if (xTi < _x0 || xTi >= m_TiX - _x1||yTi < _y0 || yTi >= m_TiY - _y1||zTi < _z0 || zTi >= m_TiZ - _z1)
+              {
+                continue;
+              }
 						}
 						else
-						{	
-							xTi = pathTi[j] / (scanY * scanZ) + xRadius;
-							tempTi = pathTi[j] % (scanY * scanZ);
-							yTi = tempTi / scanZ + yRadius;
-							zTi = tempTi % scanZ + zRadius;
-						}
+            {	
+              xTi = pathTi[j] / (scanY * scanZ) + xRadius;
+              tempTi = pathTi[j] % (scanY * scanZ);
+              yTi = tempTi / scanZ + yRadius;
+              zTi = tempTi % scanZ + zRadius;
+            }
 						distances = GetDistances(EffectivePoint, xTi, yTi, zTi, nodeX, nodeY, nodeZ);
 						if (distances == -1) 
 						{
@@ -801,18 +768,21 @@ std::string CSimulation::StartSimulation()
 				}
 			}
 			finish_flag = true;
+			//std::cout << "search sg finished" << std::endl;
 			if(finish_flag == true && assign_flag == false) {
 				double bestIndex = 0;
 				for(int i = 0; i < mindist.size(); i++) {
 					if(mindist[i] < mindist[bestIndex])
 						bestIndex = i;
 				}
-				//std::cout << bestZ[bestIndex] << bestX[bestIndex] << bestY[bestIndex] << std::endl;
-				sim_value = m_Ti[bestZ[bestIndex]][bestX[bestIndex]][bestY[bestIndex]];
+				std::cout << bestZ[bestIndex] << bestX[bestIndex] << bestY[bestIndex] << std::endl;
+				if (bestZ[bestIndex] == -1 || bestX[bestIndex] == -1 || bestY[bestIndex] == -1) {
+					sim_value = m_Ti[rand() % m_TiZ][rand() % m_TiX][rand() % m_TiY];
+				} else {
+					sim_value = m_Ti[bestZ[bestIndex]][bestX[bestIndex]][bestY[bestIndex]];
+				}
 				assign_flag = true;
 			}
-			
-			// non-blocking send;
 			MPI_Request request;
 			vector<double> sim_result;
 			sim_result.push_back(sim_value);
@@ -821,9 +791,6 @@ std::string CSimulation::StartSimulation()
 			//MPI_Isend(&sim_node_index, 1, MPI_INT, 0, 777, MPI_COMM_WORLD, &request);
 			MPI_Wait(&request, &status);
 			//std::cout << current_pid << " send NO." << sim_node_index << " value " << sim_value << std::endl;
-			//delete pathTi;
-			//pathTi = NULL;
-			//IsSimulation = true;
 		}
 		delete pathTi;
 		pathTi = NULL;
@@ -936,9 +903,15 @@ std::string CSimulation::InsertSamples()
 
 int * CSimulation::SetPath_TI(int X, int Y, int Z)
 {	
-	int current_pid;
-	MPI_Comm_rank(MPI_COMM_WORLD, &current_pid);
-	srand(1000 * current_pid);
+	int current_pid, nameLen, comm_size;
+  char processorName[MPI_MAX_PROCESSOR_NAME];
+  MPI_Comm_rank(MPI_COMM_WORLD, &current_pid);
+  MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+  MPI_Get_processor_name(processorName, &nameLen);
+  srand((unsigned)time(NULL) + comm_size * current_pid + nameLen);
+//	int current_pid;
+//	MPI_Comm_rank(MPI_COMM_WORLD, &current_pid);
+//	srand(1000 * current_pid);
 
 	int sizeXYZ = X * Y * Z;
 	int *p_Path = new int[sizeXYZ];
@@ -957,9 +930,13 @@ int * CSimulation::SetPath_TI(int X, int Y, int Z)
 	}
 	return p_Path;
 }
-
+/**
+  * Changed By Zhsc 20200605
+  * create pure sim path function
+  */
 void CSimulation::SetPath_Simul(int xRadius, int yRadius, int zRadius)
 {
+	// pure simpath function
 	for (int z = 0; z < m_SimZ; z++) {
 		for (int x = 0; x < m_SimX; x++) {
 			for (int y = 0; y < m_SimY; y++) {
@@ -967,7 +944,6 @@ void CSimulation::SetPath_Simul(int xRadius, int yRadius, int zRadius)
 				if (m_Sim[z][x][y] == -1) {
 					index = XYZToPath(x, y, z, m_SimX, m_SimY);
 					sim_path.push_back(index);
-					original_sim_path.push_back(index);
 				}
 			}
 		}
@@ -984,19 +960,9 @@ void CSimulation::SetPath_Simul(int xRadius, int yRadius, int zRadius)
 		int temp = sim_path[i];
 		sim_path[i] = sim_path[m];
 		sim_path[m] = temp;
-		int o_temp = original_sim_path[i];
-		original_sim_path[i] = original_sim_path[m];
-		original_sim_path[m] = temp;
+		
 	}
-	
-	/*for (int i = 0; i < 4; i++) {
-		for(int j = 0; j < original_sim_path.size(); j++) {
-			sim_path.push_back(original_sim_path[j]);
-		}
-	}*/
-	
 	return;
-	
 }
 
 int CSimulation::Compare3DPoint(C3DPoint a, C3DPoint b)
@@ -1155,7 +1121,15 @@ void CSimulation::GetEffectivePoint(vector<C3DPoint>& EffectivePoint, int nodeX,
 	int z0 = 0 > nodeZ - zRadius ? 0 : nodeZ - zRadius;						//ZÆðÊŒ
 	int z1 = m_SimZ - 1 < nodeZ + zRadius ? m_SimZ - 1 : nodeZ + zRadius;
 
-	
+	/**
+	* 2020/05/10 
+	* ZHSC
+	* ÐÂÔöŽÓÄÚÏòÍâ²éÕÒÓÐÐ§µã£š±éÀú¡¢ÅÐœç¡¢ÅÐÖØ¡¢ÓÐÐ§µãžöÊýŽïµœºóÖ±œÓ·µ»Ø£©
+	* ÐèÒªÊ¹ÓÃÔ­²éÕÒÓÐÐ§µã·œ·šÊ±ÐèÈ«²¿×¢ÊÍµô
+	* µ±Ç°ŽæÔÚÎÊÌâ£ºÓÐÐ§µã³€¶È²»Îª0Ê±ÎªºÎdistanceÎª-1
+	**/
+	//std::cout << "get effective point DEBUG: " << nodeX << " " << nodeY << " " << nodeZ << std::endl;	
+	//¶þÎ¬ÍŒÏñ
 	if (z0 == z1)
 	{
 		if (m_SearchArea.MySearchAreaType == SearchArea::SearchAreaType::Sphere) {
@@ -1234,7 +1208,7 @@ void CSimulation::GetEffectivePoint(vector<C3DPoint>& EffectivePoint, int nodeX,
 		
 		}
 	}
-	else 
+	else //ÈýÎ¬ÍŒÏñ
 	{
 		if (m_SearchArea.MySearchAreaType == SearchArea::SearchAreaType::Sphere) {
 			int cnt = m_SearchArea.MySearchAreaData.Sphere.MaxPoints;
@@ -1281,10 +1255,12 @@ void CSimulation::GetEffectivePoint(vector<C3DPoint>& EffectivePoint, int nodeX,
 						}
 					}
 				} 
+				//×óÓÒÁœžöÃæ
 				for (int iY = nodeY - m; iY <= nodeY + m; iY++)
 				{
-					if (iY >= y0 && iY <= y1)
+					if (iY >= y0 && iY <= y1) //±ßœçµãÅÐ¶Ï
 					{
+						//Áœ¶ËÈ¥ÖØ
 						for (int iZ = nodeZ - m + 1; iZ < nodeZ + m; iZ++)
 						{
 							if (iZ >= z0 && iZ <= z1)
@@ -1315,6 +1291,7 @@ void CSimulation::GetEffectivePoint(vector<C3DPoint>& EffectivePoint, int nodeX,
 						}
 					}
 				}
+				//Ç°ºóÁœžöÃæ
 				for (int iX = nodeX - m + 1; iX < nodeX + m; iX++)
 				{
 					if (iX >= x0 && iX <= x1)
@@ -1351,14 +1328,17 @@ void CSimulation::GetEffectivePoint(vector<C3DPoint>& EffectivePoint, int nodeX,
 			}
 		}
 	}
+
 	return;
 }
 
+//TODO BUG: GetDistances erase all the node in EffectivePoint
 double CSimulation::GetDistances(vector<C3DPoint> EffectivePoint, int x, int y, int z, int nodeX, int nodeY, int nodeZ)
 {
 	double sum = 0;
 	for (vector<C3DPoint>::iterator it = EffectivePoint.begin(); it != EffectivePoint.end(); )
 	{
+		//µ±ÑµÁ·ÍŒÏñÎª¶þÎ¬£¬ÒªÄ£ÄâÈýÎ¬£¬³öÎÊÌâ£¬ŒÓÒÔÏÂÅÅ³ý£¬ÕâÐ©µã²»ÄÜËãŸàÀë
 		if (z - nodeZ + it->z < 0 || z - nodeZ + it->z >= m_TiZ || x - nodeX + it->x < 0 || x - nodeX + it->x >= m_TiX || y - nodeY + it->y < 0 || y - nodeY + it->y >= m_TiY)
 		{
 			//std::cout << "GetDistances erase EffectivePoint" <<std::endl;

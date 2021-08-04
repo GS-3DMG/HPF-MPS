@@ -6,11 +6,13 @@ static string paraFile = "params.txt";
 string getSavePath(string tiPath, string s_num);
 
 int main(int argc, char** argv){
+	//string paraFile = "/home/zhsc/Code/params.txt";
+	//string tiPath = "/home/zhsc/Code/TI_channel.SGEMS";
+	//string samplesPath = "/home/zhsc/Code/Con_channel_100.sgems";
 
 	MPI_Init(&argc, &argv);
-	//std::cout << "time: " << MPI_Wtime() << std::endl;
-	int pid, psize;
-	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+  int pid, psize;
+  MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &psize);
 	MPI_Status status;
 
@@ -18,17 +20,17 @@ int main(int argc, char** argv){
 
 	//init parameters
 	int m_Simul_Num = 1; //number of multi simulate
-	bool m_IsHaveSample = true; //if have sample data
-	int m_SimX;
-	int m_SimY;
-	int m_SimZ;
-	float m_Fract;
-	float m_Thr;
-	int m_MaxPoints;
-	int m_SearchRadius;
-	string tiPath = "";
-	string samplesPath = "";
-	if (pid == 0) { 
+  bool m_IsHaveSample = true; //if have sample data
+  int m_SimX;
+  int m_SimY;
+  int m_SimZ;
+  float m_Fract;
+  float m_Thr;
+  int m_MaxPoints;
+  int m_SearchRadius;
+  string tiPath = "";
+  string samplesPath = "";
+  if (pid == 0) { 
 		//read parameters from param file
 		stringstream buffer;
 		string line;
@@ -71,6 +73,7 @@ int main(int argc, char** argv){
 			MPI_Send(&size, 1, MPI_INT, ii, 1, MPI_COMM_WORLD);
 			MPI_Send(&algorithmPara[0], size, MPI_DOUBLE, ii, 11, MPI_COMM_WORLD);
 		}	
+
 	} else {
 		int buffer_size;
 		vector<double> buffer_paras;
@@ -87,26 +90,21 @@ int main(int argc, char** argv){
 	}
 
 	SearchArea searchArea;
-		searchArea.MySearchAreaType = SearchArea::SearchAreaType::Sphere;
-		searchArea.MySearchAreaData.Sphere.MaxPoints = m_MaxPoints;
-		searchArea.MySearchAreaData.Sphere.SearchRadius = m_SearchRadius;
-		searchArea.MySearchAreaData.Sphere.IsUseSamePathSize = false;
-		searchArea.MySearchAreaData.Sphere.IsSampleFirst = false;
-	
+  searchArea.MySearchAreaType = SearchArea::SearchAreaType::Sphere;
+  searchArea.MySearchAreaData.Sphere.MaxPoints = m_MaxPoints;
+  searchArea.MySearchAreaData.Sphere.SearchRadius = m_SearchRadius;
+	searchArea.MySearchAreaData.Sphere.IsUseSamePathSize = false;
+	searchArea.MySearchAreaData.Sphere.IsSampleFirst = false;
 
 	std::cout << "Finish load parameters." << std::endl;
 
 	//construct
 	p_Simulation = new CSimulation(m_SimX, m_SimY, m_SimZ, m_Fract, m_Thr, DistanceType::Different, searchArea, SimulatingPathType::Random);
-	/*p_Simulation->m_TiX = 250;
-	p_Simulation->m_TiY = 250;
-	p_Simulation->m_TiZ = 1;*/
 
 	//load ti and sample
-	p_Simulation->LoadTi(tiPath);
-	p_Simulation->LoadSamples(samplesPath);
+	p_Simulation->LoadTi("Strebelle_250x250.sgems");
 	//p_Simulation->LoadTi("TI_channel2000.sgems");
-	//p_Simulation->LoadSamples("channel_100.SGEMS");
+	p_Simulation->LoadSamples("Con_100.sgems");
 	//p_Simulation->LoadTi("Berea_400.dat");
 	//p_Simulation->LoadTi("fold180.SGEMS");
 	//p_Simulation->LoadSamples("xyz543.sgems");
@@ -140,7 +138,6 @@ int main(int argc, char** argv){
 		//initialize SG
 		if(pid == 0){
 			p_Simulation->ResetSim();
-			//startTime = clock();
 		}
 
 		std::cout << "process " << pid <<" start simulation" << std::endl;

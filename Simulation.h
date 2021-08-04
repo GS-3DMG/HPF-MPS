@@ -30,7 +30,7 @@ typedef struct C3DPointInformation
 	}
 }C3DPoint;
 
-enum PropertyFileType			//ÊôÐÔÎÄŒþžñÊœ
+enum PropertyFileType			
 {
 	SGEMS,
 	ATT
@@ -38,15 +38,15 @@ enum PropertyFileType			//ÊôÐÔÎÄŒþžñÊœ
 
 enum DistanceType
 {
-	Different,					//ÇóÒì
-	Variance,					//·œ²î
-	WeightedVariance			//ŒÓÈš·œ²î
+	Different,					
+	Variance,					
+	WeightedVariance			
 };
 
 enum SimulatingPathType
 {
 	Random,						//Random
-	Relative_to_Data_Density,	//ºÍÃÜ¶ÈÏà¹Ø
+	Relative_to_Data_Density,	
 	XYZ,						//unilateral +X, +Y, +Z,
 	YXZ,						//unilateral +Y, +X, +Z,
 	ZXY							//unilateral +Z, +X, +Y, 
@@ -54,53 +54,53 @@ enum SimulatingPathType
 
 struct SearchAreaCuboid
 {
-	int HalfX;				//³€·œÌåµÄXÒ»°ë
-	int HalfY;				//³€·œÌåµÄYÒ»°ë
-	int HalfZ;				//³€·œÌåµÄZÒ»°ë
+	int HalfX;				
+	int HalfY;				
+	int HalfZ;				
 };
 
 struct SearchAreaSphere
 {
-	double SearchRadius;				//ËÑË÷°ëŸ¶£¬ÓÃÓÚÕÒµœÊýŸÝÑù°åÖÐÓÐÐ§µÄnžöµã×÷ÎªÊýŸÝÊÂŒþ
-	int MaxPoints;						//×îŽóµÄÓÐÐ§µãžöÊý
-	bool IsSampleFirst;					//ÌõŒþÊýŸÝÊÇ·ñÓÅÏÈ
-	bool IsUseSamePathSize;				//ÊÇ·ñÊ¹ÓÃÍ¬Ò»ÉšÃè³ßŽç
+	double SearchRadius;				
+	int MaxPoints;						
+	bool IsSampleFirst;				
+	bool IsUseSamePathSize;			
 	enum PartitionType
 	{
-		No,				//²»·Ö
-		Cross,			//Ê®×ÖËÄ·Ö/ÈýÎ¬°Ë·Ö
-		Fork			//X×ÖËÄ·Ö/ÈýÎ¬°Ë·Ö
-	} MyPartitionType;					//ËÑË÷·ÖÇøÀàÐÍ
+		No,				
+		Cross,		
+		Fork		
+	} MyPartitionType;				
 };
 
 struct SearchArea
 {
 	enum SearchAreaType
 	{
-		Cuboid,		//Õý·œÌå
-		Sphere		//ÇòÌå
-	} MySearchAreaType;			//ËÑË÷ÇøÓòÀàÐÍ
+		Cuboid,		
+		Sphere	
+	} MySearchAreaType;		
 
 	union SearchAreaData
 	{
-		SearchAreaCuboid Cuboid;		//Õý·œÌå
-		SearchAreaSphere Sphere;		//ÇòÌå
-	} MySearchAreaData;		//ËÑË÷ÇøÓò²ÎÊý
+		SearchAreaCuboid Cuboid;	
+		SearchAreaSphere Sphere;	
+	} MySearchAreaData;		
 };
 
 struct PropertyInformation
 {
-	string PropertyName;			//ÊôÐÔÃû³Æ
-	double MinValue;				//ÊôÐÔ×îÐ¡Öµ
-	double MaxValue;				//ÊôÐÔ×îŽóÖµ
+	string PropertyName;	
+	double MinValue;			
+	double MaxValue;			
 };
 
 class CSimulation
 {
 public:
 public:
-	vector<vector<vector<double>>> m_Ti;		//trianing image			Ë³ÐòZ X Y
-	vector<vector<vector<double>>> m_Sim;		//simulation grid		Ë³ÐòZ X Y
+	vector<vector<vector<double>>> m_Ti;		//trianing image	
+	vector<vector<vector<double>>> m_Sim;		//simulation grid	
 	vector<vector<vector<bool>>> m_SimMark;		//sim mark		Z X Y
 
 	vector<C3DPoint> m_Samples;					//sample data
@@ -116,25 +116,25 @@ public:
 	vector<int> sim_path; //parallel simpath
 	
 
-	int m_SimX, m_SimY, m_SimZ;				//²ÉÑùœá¹ûµÄ³ßŽç
-	int m_TiX, m_TiY, m_TiZ;				//ÑµÁ·ÍŒÏñµÄ³ßŽç
+	int m_SimX, m_SimY, m_SimZ;			
+	int m_TiX, m_TiY, m_TiZ;			
 
-	int m_SamplesMinX, m_SamplesMaxX;		//³õÊŒÑùÆ··¶Î§
+	int m_SamplesMinX, m_SamplesMaxX;	
 	int m_SamplesMinY, m_SamplesMaxY;
 	int m_SamplesMinZ, m_SamplesMaxZ;
 
-	double m_F;					//Ã¿ŽÎÔÚÑµÁ·ÍŒÏñÉÏÉšÃèµÄ°Ù·Ö±È,(0,1]
-	double m_T;					//¶Ô±ÈŸàÀëµÄãÐÖµ
+	double m_F;				
+	double m_T;				
 
-	SearchArea m_SearchArea;				//ËÑË÷ÇøÓòÐÅÏ¢
+	SearchArea m_SearchArea;		
 
-	DistanceType m_DistanceType;	//ŸàÀëŒÆËã·œÊœ
+	DistanceType m_DistanceType;	
 
-	SimulatingPathType m_Simul_Path_Type;	//Ä£ÄâÂ·Ÿ¶·œÊœ    
+	SimulatingPathType m_Simul_Path_Type; 
 
-	int *p_ScanCouts;			//Ã¿ŽÎœÓÊÕµÄÊ±ºòÉšÃèÑµÁ·ÍŒÏñµÄŽÎÊý
-	int *p_Bestmin;				//Ã¿ŽÎœÓÊÕµÄÊ±ºòµÄ×îÐ¡ŸàÀë
-	double m_Time;				//²ÉÑùºÄÊ±
+	int *p_ScanCouts;		
+	int *p_Bestmin;			
+	double m_Time;		
 
 
 	CSimulation(int simx, int simy, int simz, double f, double thr, DistanceType distanceType, SearchArea searchArea, SimulatingPathType simulPathType, bool isHaveSamples = false );
