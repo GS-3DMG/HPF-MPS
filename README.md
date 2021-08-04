@@ -20,6 +20,7 @@ Hardware environment 2:
 * Unix OS
 * MPICC/3.2.1
 * GCC/7.2.0
+** If you try to use a different software environment for testing, please report back to us when there are problems or bugs in order to improve the code robustness.
 
 ## Examples
 A small-scale test data is provided:
@@ -34,7 +35,7 @@ mpic++ -o test DS_Simultion.cpp Simulation.h Simulation.cpp -fopenmp
 ```
 * Execute
 ```
-mpirun -n -p training ./test
+mpirun -np processing_unit ./test
 ```
 
 ## Contributors
