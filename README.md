@@ -23,6 +23,8 @@ Hardware environment 2:
 
 *If you try to use a different software environment for testing, please report back to us when there are problems or bugs in order to improve the code robustness.*
 
+***Please make sure run the executable program when there is an active LAN internet connection.***
+
 ## Examples
 A small-scale test data is provided:
 
