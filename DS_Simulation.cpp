@@ -20,17 +20,17 @@ int main(int argc, char** argv){
 
 	//init parameters
 	int m_Simul_Num = 1; //number of multi simulate
-  bool m_IsHaveSample = true; //if have sample data
-  int m_SimX;
-  int m_SimY;
-  int m_SimZ;
-  float m_Fract;
-  float m_Thr;
-  int m_MaxPoints;
-  int m_SearchRadius;
-  string tiPath = "";
-  string samplesPath = "";
-  if (pid == 0) { 
+  	bool m_IsHaveSample = true; //if have sample data
+  	int m_SimX;
+  	int m_SimY;
+  	int m_SimZ;
+  	float m_Fract;
+  	float m_Thr;
+  	int m_MaxPoints;
+  	int m_SearchRadius;
+  	string tiPath = "";
+  	string samplesPath = "";
+  	if (pid == 0) { 
 		//read parameters from param file
 		stringstream buffer;
 		string line;
