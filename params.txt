@@ -1,0 +1,25 @@
+#Parameters
+
+                                              
+#number of multi simulate
+1
+#size of simulation grid (in order X, Y, Z)
+250 250 1
+#ratio of scan region
+0.8
+#distance threshold
+0.1
+#max number of effective data points
+20
+#serach radius
+20
+#type of search area (Sphere)
+Sphere
+#file path of training image
+#/home/MPI/MPS_DATA/Maules_Creek(3D)340x200x80.SGEMS
+#/home/MPI/MPS_DATA/fold_categorical_90x90x90.sgems
+#/home/MPI/MPS_DATA/TI_channel.SGEMS
+#file path of data samples
+#/home/MPI/MPS_DATA/Con_Maules_Creek(3D).sgems
+#/home/MPI/MPS_DATA/Con_fold_categorical_90x90x90.sgems
+#/home/MPI/MPS_DATA/Con_channel_100.sgems
