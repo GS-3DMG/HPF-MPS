@@ -11,8 +11,8 @@ int main(int argc, char** argv){
 	//string samplesPath = "/home/zhsc/Code/Con_channel_100.sgems";
 
 	MPI_Init(&argc, &argv);
-  int pid, psize;
-  MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+  	int pid, psize;
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &psize);
 	MPI_Status status;
 
