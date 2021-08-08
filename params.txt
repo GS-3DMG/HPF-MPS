@@ -1,6 +1,5 @@
 #Parameters
 
-                                              
 #number of multi simulate
 1
 #size of simulation grid (in order X, Y, Z)
@@ -10,9 +9,9 @@
 #distance threshold
 0.1
 #max number of effective data points
-20
+30
 #serach radius
-20
+30
 #type of search area (Sphere)
 Sphere
 #file path of training image

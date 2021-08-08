@@ -775,7 +775,7 @@ std::string CSimulation::StartSimulation()
 					if(mindist[i] < mindist[bestIndex])
 						bestIndex = i;
 				}
-				std::cout << bestZ[bestIndex] << bestX[bestIndex] << bestY[bestIndex] << std::endl;
+				//std::cout << bestZ[bestIndex] << bestX[bestIndex] << bestY[bestIndex] << std::endl;
 				if (bestZ[bestIndex] == -1 || bestX[bestIndex] == -1 || bestY[bestIndex] == -1) {
 					sim_value = m_Ti[rand() % m_TiZ][rand() % m_TiX][rand() % m_TiY];
 				} else {

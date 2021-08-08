@@ -11,8 +11,8 @@ int main(int argc, char** argv){
 	//string samplesPath = "/home/zhsc/Code/Con_channel_100.sgems";
 
 	MPI_Init(&argc, &argv);
-  	int pid, psize;
- 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+  int pid, psize;
+  MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	MPI_Comm_size(MPI_COMM_WORLD, &psize);
 	MPI_Status status;
 
@@ -20,17 +20,17 @@ int main(int argc, char** argv){
 
 	//init parameters
 	int m_Simul_Num = 1; //number of multi simulate
-  	bool m_IsHaveSample = true; //if have sample data
-  	int m_SimX;
-  	int m_SimY;
-  	int m_SimZ;
-  	float m_Fract;
-  	float m_Thr;
-  	int m_MaxPoints;
-  	int m_SearchRadius;
-  	string tiPath = "";
-  	string samplesPath = "";
-  	if (pid == 0) { 
+  bool m_IsHaveSample = true; //if have sample data
+  int m_SimX;
+  int m_SimY;
+  int m_SimZ;
+  float m_Fract;
+  float m_Thr;
+  int m_MaxPoints;
+  int m_SearchRadius;
+  string tiPath = "";
+  string samplesPath = "";
+  if (pid == 0) { 
 		//read parameters from param file
 		stringstream buffer;
 		string line;
@@ -58,8 +58,8 @@ int main(int argc, char** argv){
 		m_Thr = atof(params[3].c_str());
 		m_MaxPoints = atoi(params[4].c_str());
 		m_SearchRadius = atoi(params[5].c_str());
-		//tiPath.append(params[7]);
-		//samplesPath.append(params[8]);
+		tiPath.append(params[7]);
+		samplesPath.append(params[8]);
 		for(int ii = 1; ii < psize; ii++){
 			vector<double> algorithmPara;
 			algorithmPara.push_back(m_SimX);
@@ -90,9 +90,9 @@ int main(int argc, char** argv){
 	}
 
 	SearchArea searchArea;
-  	searchArea.MySearchAreaType = SearchArea::SearchAreaType::Sphere;
-  	searchArea.MySearchAreaData.Sphere.MaxPoints = m_MaxPoints;
-  	searchArea.MySearchAreaData.Sphere.SearchRadius = m_SearchRadius;
+  searchArea.MySearchAreaType = SearchArea::SearchAreaType::Sphere;
+  searchArea.MySearchAreaData.Sphere.MaxPoints = m_MaxPoints;
+  searchArea.MySearchAreaData.Sphere.SearchRadius = m_SearchRadius;
 	searchArea.MySearchAreaData.Sphere.IsUseSamePathSize = false;
 	searchArea.MySearchAreaData.Sphere.IsSampleFirst = false;
 
